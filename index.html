@@ -238,7 +238,7 @@
         </div>
       </section>
 
-      <!-- COLUMNA DERECHA: CAMPO TÁCTICO 3-2-1 Y BANQUILLO (7 cols en desktop) -->
+      <!-- COLUMNA DERECHA: CAMPO TÁCTICO Y BANQUILLO (7 cols en desktop) -->
       <section class="lg:col-span-7 flex flex-col gap-5">
 
         <!-- Tarjeta del Campo Táctico -->
@@ -306,7 +306,7 @@
               <path d="M 282 390 A 8 8 0 0 1 290 382" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.4" />
             </svg>
 
-            <!-- Capa Interactiva de Posiciones 3-2-1 -->
+            <!-- Capa Interactiva de Posiciones -->
             <div id="pitch-slots-layer" class="absolute inset-0">
               <!-- Se renderiza dinámicamente por JS -->
             </div>
@@ -320,6 +320,9 @@
               </span>
               <span class="inline-flex items-center gap-1.5 text-slate-200 font-medium">
                 <span class="w-3 h-3 rounded-full bg-green-500 border border-white/80"></span> Jugadores de campo (DEF · MED · DEL)
+              </span>
+              <span class="inline-flex items-center gap-1.5 text-slate-200 font-medium">
+                <span class="px-1 py-0.2 rounded bg-amber-400 text-slate-950 font-display text-[10px] font-extrabold leading-tight">C</span> Capitán
               </span>
             </div>
             <div class="flex items-center gap-2 ml-auto">
@@ -489,9 +492,9 @@
 
   <script>
     // =========================================================================
-    // 1. DATOS INICIALES DE LA PLANTILLA (17 JUGADORES EXACTOS)
+    // 1. DATOS INICIALES DE LA PLANTILLA Y FORMACIONES (3-2-1 Y 2-3-1)
     // =========================================================================
-    const STORAGE_KEY = 'futbol7_321_tactica_v4';
+    const STORAGE_KEY = 'futbol7_tactica_v5';
 
     const INITIAL_SQUAD = [
       { id: 'p10', dorsal: '13', position: 'POR',     name: 'MIGUEL MARTÍN',  available: true },
@@ -513,35 +516,30 @@
       { id: 'p15', dorsal: '75', position: 'DEL',     name: 'RUFO',           available: true }
     ];
 
+    // Capitanes del equipo: Mario Gorjón, Brais, Rober y Yaron
+    const CAPTAIN_IDS = new Set(['p9', 'p4', 'p14', 'p17']);
+
     const POSITION_ORDER = { 'POR': 1, 'DEF': 2, 'MED/DEF': 3, 'MED': 4, 'MED/DEL': 5, 'DEL': 6 };
 
     const FORMATIONS = {
-      '3-2-1': {
-        id: '3-2-1',
-        label: '3-2-1',
-        slots: [
-          { id: 'DC',  label: 'DC',  fullName: 'Delantero Centro',  line: 'DEL', x: 50, y: 15, compatible: ['DEL', 'MED/DEL'] },
-          { id: 'MCI', label: 'MCI', fullName: 'Mediocentro Izq.',  line: 'MED', x: 30, y: 40, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
-          { id: 'MCD', label: 'MCD', fullName: 'Mediocentro Der.',  line: 'MED', x: 70, y: 40, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
-          { id: 'DFI', label: 'DFI', fullName: 'Lateral Izquierdo', line: 'DEF', x: 20, y: 65, compatible: ['DEF', 'MED/DEF'] },
-          { id: 'DFC', label: 'DFC', fullName: 'Defensa Central',   line: 'DEF', x: 50, y: 68, compatible: ['DEF', 'MED/DEF'] },
-          { id: 'DFD', label: 'DFD', fullName: 'Lateral Derecho',   line: 'DEF', x: 80, y: 65, compatible: ['DEF', 'MED/DEF'] },
-          { id: 'POR', label: 'POR', fullName: 'Portero',           line: 'POR', x: 50, y: 88, compatible: ['POR'] }
-        ]
-      },
-      '2-3-1': {
-        id: '2-3-1',
-        label: '2-3-1',
-        slots: [
-          { id: 'DC',  label: 'DC',  fullName: 'Delantero Centro',   line: 'DEL', x: 50, y: 15, compatible: ['DEL', 'MED/DEL'] },
-          { id: 'MI',  label: 'MI',  fullName: 'Interior Izquierdo', line: 'MED', x: 19, y: 41, compatible: ['MED', 'MED/DEL', 'MED/DEF'] },
-          { id: 'MC',  label: 'MC',  fullName: 'Mediocentro',        line: 'MED', x: 50, y: 44, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
-          { id: 'MD',  label: 'MD',  fullName: 'Interior Derecho',   line: 'MED', x: 81, y: 41, compatible: ['MED', 'MED/DEL', 'MED/DEF'] },
-          { id: 'DFI', label: 'DFI', fullName: 'Defensa Izquierdo',  line: 'DEF', x: 30, y: 67, compatible: ['DEF', 'MED/DEF'] },
-          { id: 'DFD', label: 'DFD', fullName: 'Defensa Derecho',    line: 'DEF', x: 70, y: 67, compatible: ['DEF', 'MED/DEF'] },
-          { id: 'POR', label: 'POR', fullName: 'Portero',            line: 'POR', x: 50, y: 88, compatible: ['POR'] }
-        ]
-      }
+      '3-2-1': [
+        { id: 'DC',  label: 'DC',  fullName: 'Delantero Centro',  line: 'DEL', x: 50, y: 15, compatible: ['DEL', 'MED/DEL'] },
+        { id: 'MCI', label: 'MCI', fullName: 'Mediocentro Izq.',  line: 'MED', x: 30, y: 40, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
+        { id: 'MCD', label: 'MCD', fullName: 'Mediocentro Der.',  line: 'MED', x: 70, y: 40, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
+        { id: 'DFI', label: 'DFI', fullName: 'Lateral Izquierdo', line: 'DEF', x: 20, y: 65, compatible: ['DEF', 'MED/DEF'] },
+        { id: 'DFC', label: 'DFC', fullName: 'Defensa Central',   line: 'DEF', x: 50, y: 68, compatible: ['DEF', 'MED/DEF'] },
+        { id: 'DFD', label: 'DFD', fullName: 'Lateral Derecho',   line: 'DEF', x: 80, y: 65, compatible: ['DEF', 'MED/DEF'] },
+        { id: 'POR', label: 'POR', fullName: 'Portero',           line: 'POR', x: 50, y: 88, compatible: ['POR'] }
+      ],
+      '2-3-1': [
+        { id: 'DC',  label: 'DC',  fullName: 'Delantero Centro',  line: 'DEL', x: 50, y: 15, compatible: ['DEL', 'MED/DEL'] },
+        { id: 'MI',  label: 'MI',  fullName: 'Interior Izquierdo',line: 'MED', x: 20, y: 40, compatible: ['MED', 'MED/DEL', 'MED/DEF'] },
+        { id: 'MC',  label: 'MC',  fullName: 'Mediocentro',       line: 'MED', x: 50, y: 43, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
+        { id: 'MD',  label: 'MD',  fullName: 'Interior Derecho',  line: 'MED', x: 80, y: 40, compatible: ['MED', 'MED/DEL', 'MED/DEF'] },
+        { id: 'DFI', label: 'DFI', fullName: 'Defensa Izquierdo', line: 'DEF', x: 30, y: 66, compatible: ['DEF', 'MED/DEF'] },
+        { id: 'DFD', label: 'DFD', fullName: 'Defensa Derecho',   line: 'DEF', x: 70, y: 66, compatible: ['DEF', 'MED/DEF'] },
+        { id: 'POR', label: 'POR', fullName: 'Portero',           line: 'POR', x: 50, y: 88, compatible: ['POR'] }
+      ]
     };
 
     // Código de color: Portero en blanco, jugadores de campo en verde
@@ -574,15 +572,7 @@
     let state = {
       formation: '3-2-1',
       players: [],
-      lineup: {
-        POR: null,
-        DFI: null,
-        DFC: null,
-        DFD: null,
-        MCI: null,
-        MCD: null,
-        DC:  null
-      },
+      lineup: {},
       filterPosition: 'ALL',
       sortBy: 'POSITION', // 'POSITION' | 'DORSAL'
       searchQuery: '',
@@ -592,13 +582,15 @@
     };
 
     function getCurrentSlots() {
-      return (FORMATIONS[state.formation] || FORMATIONS['3-2-1']).slots;
+      return FORMATIONS[state.formation] || FORMATIONS['3-2-1'];
     }
 
-    function createEmptyLineup(formationId = state.formation) {
-      const slots = (FORMATIONS[formationId] || FORMATIONS['3-2-1']).slots;
+    function createEmptyLineup(formationKey = state.formation) {
+      const slots = FORMATIONS[formationKey] || FORMATIONS['3-2-1'];
       const lineup = {};
-      slots.forEach(s => { lineup[s.id] = null; });
+      slots.forEach(s => {
+        lineup[s.id] = null;
+      });
       return lineup;
     }
 
@@ -610,11 +602,11 @@
           if (Array.isArray(parsed.players) && parsed.players.length > 0 && parsed.lineup) {
             state.formation = FORMATIONS[parsed.formation] ? parsed.formation : '3-2-1';
             state.players = parsed.players;
-            const nextLineup = createEmptyLineup(state.formation);
-            for (const slotId of Object.keys(nextLineup)) {
-              nextLineup[slotId] = parsed.lineup[slotId] || null;
+            const freshLineup = createEmptyLineup(state.formation);
+            for (const key of Object.keys(freshLineup)) {
+              freshLineup[key] = parsed.lineup[key] || null;
             }
-            state.lineup = nextLineup;
+            state.lineup = freshLineup;
             sanitizeLineup();
             return;
           }
@@ -646,46 +638,68 @@
       const validAvailableIds = new Set(
         state.players.filter(p => p.available).map(p => p.id)
       );
-      const slots = getCurrentSlots();
-      const sanitized = {};
+      const validSlots = new Set(getCurrentSlots().map(s => s.id));
       const seen = new Set();
 
-      for (const slot of slots) {
-        const pid = state.lineup[slot.id];
+      for (const slotId of Object.keys(state.lineup)) {
+        if (!validSlots.has(slotId)) {
+          delete state.lineup[slotId];
+          continue;
+        }
+        const pid = state.lineup[slotId];
         if (!pid || !validAvailableIds.has(pid) || seen.has(pid)) {
-          sanitized[slot.id] = null;
+          state.lineup[slotId] = null;
         } else {
-          sanitized[slot.id] = pid;
           seen.add(pid);
         }
       }
-      state.lineup = sanitized;
+      for (const slotId of validSlots) {
+        if (!(slotId in state.lineup)) {
+          state.lineup[slotId] = null;
+        }
+      }
     }
 
     function setFormation(newFormation) {
       if (!FORMATIONS[newFormation] || state.formation === newFormation) return;
 
       const oldLineup = { ...state.lineup };
-      const nextLineup = createEmptyLineup(newFormation);
+      const newLineup = createEmptyLineup(newFormation);
+      const placedIds = new Set();
 
-      // Conservar los jugadores ya situados en puestos equivalentes
-      nextLineup.POR = oldLineup.POR || null;
-      nextLineup.DFI = oldLineup.DFI || null;
-      nextLineup.DFD = oldLineup.DFD || null;
-      nextLineup.DC  = oldLineup.DC  || null;
+      // 1. Mantener puestos idénticos (POR, DC, DFI, DFD)
+      for (const slotId of Object.keys(newLineup)) {
+        if (oldLineup[slotId] && !placedIds.has(oldLineup[slotId])) {
+          newLineup[slotId] = oldLineup[slotId];
+          placedIds.add(oldLineup[slotId]);
+        }
+      }
 
-      if (newFormation === '2-3-1') {
-        nextLineup.MI = oldLineup.MCI || null;
-        nextLineup.MC = oldLineup.DFC || null;
-        nextLineup.MD = oldLineup.MCD || null;
-      } else if (newFormation === '3-2-1') {
-        nextLineup.MCI = oldLineup.MI || null;
-        nextLineup.DFC = oldLineup.MC || null;
-        nextLineup.MCD = oldLineup.MD || null;
+      // 2. Mapear equivalencias tácticas entre 3-2-1 y 2-3-1
+      const equivalences = newFormation === '2-3-1'
+        ? [['MCI', 'MI'], ['MCD', 'MD'], ['DFC', 'MC']]
+        : [['MI', 'MCI'], ['MD', 'MCD'], ['MC', 'DFC']];
+
+      for (const [fromSlot, toSlot] of equivalences) {
+        const pid = oldLineup[fromSlot];
+        if (pid && !placedIds.has(pid) && toSlot in newLineup && !newLineup[toSlot]) {
+          newLineup[toSlot] = pid;
+          placedIds.add(pid);
+        }
+      }
+
+      // 3. Reubicar cualquier titular restante en el primer hueco libre
+      for (const pid of Object.values(oldLineup)) {
+        if (!pid || placedIds.has(pid)) continue;
+        const emptySlot = Object.keys(newLineup).find(k => !newLineup[k]);
+        if (emptySlot) {
+          newLineup[emptySlot] = pid;
+          placedIds.add(pid);
+        }
       }
 
       state.formation = newFormation;
-      state.lineup = nextLineup;
+      state.lineup = newLineup;
       saveState();
       renderAll();
       showToast(`Esquema cambiado a ${newFormation}.`, 'emerald');
@@ -696,6 +710,13 @@
     // =========================================================================
     function getPlayerById(id) {
       return state.players.find(p => p.id === id) || null;
+    }
+
+    function isCaptain(player) {
+      if (!player) return false;
+      if (CAPTAIN_IDS.has(player.id)) return true;
+      const norm = normalizeText(player.name);
+      return norm === 'mario gorjon' || norm === 'brais' || norm === 'rober' || norm === 'roberto' || norm === 'yaron';
     }
 
     function getAssignedSlotForPlayer(playerId) {
@@ -729,7 +750,6 @@
     function getShortPitchName(fullName) {
       const parts = fullName.trim().split(/\s+/);
       if (parts.length === 1) return parts[0];
-      // Si el primer nombre se repite (ej. ÁLVARO / ÁLVARO GORJÓN), mostrar apellido o inicial
       if (parts[0] === 'ÁLVARO' || parts[0] === 'ALVARO') {
         return `${parts[0][0]}. ${parts[1]}`;
       }
@@ -767,27 +787,27 @@
     // =========================================================================
     function renderAll() {
       sanitizeLineup();
-      renderFormationUI();
+      renderFormationControls();
       renderStats();
       renderRosterList();
       renderPitch();
       renderBench();
     }
 
-    function renderFormationUI() {
-      const headerBadge = document.getElementById('header-formation-badge');
-      const pitchTitle = document.getElementById('pitch-formation-title');
-      if (headerBadge) headerBadge.textContent = `Sistema ${state.formation}`;
-      if (pitchTitle) pitchTitle.textContent = `7 Inicial · Esquema ${state.formation}`;
+    function renderFormationControls() {
+      document.getElementById('header-formation-badge').textContent = `Sistema ${state.formation}`;
+      document.getElementById('pitch-formation-title').textContent = `7 Inicial · Esquema ${state.formation}`;
 
-      ['3-2-1', '2-3-1'].forEach(f => {
-        const btn = document.getElementById(`formation-btn-${f}`);
-        if (!btn) return;
-        const isActive = state.formation === f;
-        btn.className = isActive
-          ? 'px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider bg-emerald-600 text-white shadow-sm transition'
-          : 'px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider text-slate-400 hover:text-white transition';
-      });
+      const btn321 = document.getElementById('formation-btn-3-2-1');
+      const btn231 = document.getElementById('formation-btn-2-3-1');
+
+      if (state.formation === '3-2-1') {
+        btn321.className = 'px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider bg-emerald-600 text-white shadow transition';
+        btn231.className = 'px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider text-slate-400 hover:text-white transition';
+      } else {
+        btn231.className = 'px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider bg-emerald-600 text-white shadow transition';
+        btn321.className = 'px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider text-slate-400 hover:text-white transition';
+      }
     }
 
     function renderStats() {
@@ -886,6 +906,7 @@
                   <span class="text-xs sm:text-sm font-semibold text-white truncate">
                     ${escapeHtml(player.name)}
                   </span>
+                  ${isCaptain(player) ? '<span class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-display text-[10px] font-extrabold leading-tight" title="Capitán">C</span>' : ''}
                 </div>
                 <div class="flex items-center gap-1.5 mt-0.5">
                   <span class="px-1.5 py-0.2 text-[10px] font-bold rounded border ${style.badge}">
@@ -970,6 +991,11 @@
               <span class="absolute -top-1 -left-1.5 px-1.5 py-0.2 rounded bg-slate-950/90 border border-white/25 font-display text-[10px] font-extrabold text-amber-300 shadow">
                 ${slot.label}
               </span>
+              ${isCaptain(player) ? `
+                <span class="absolute -top-1 -right-1.5 px-1.5 py-0.2 rounded bg-amber-400 border border-slate-950 font-display text-[10px] font-extrabold text-slate-950 shadow" title="Capitán">
+                  C
+                </span>
+              ` : ''}
             </div>
             <div class="mt-0.5 px-2 py-0.5 rounded-md bg-slate-950/90 border border-white/20 shadow-md max-w-[105px] text-center">
               <p class="text-[11px] font-bold text-white truncate leading-tight">
