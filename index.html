@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pizarra Táctica Fútbol 7 · Formación 3-2-1</title>
+  <title>Pizarra Táctica Fútbol 7</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Inter & Barlow Condensed -->
@@ -120,7 +120,7 @@
             <h1 class="font-display text-xl sm:text-2xl font-extrabold tracking-wide uppercase text-white leading-none">
               Pizarra F7
             </h1>
-            <span class="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span id="header-formation-badge" class="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               Sistema 3-2-1
             </span>
           </div>
@@ -243,12 +243,30 @@
 
         <!-- Tarjeta del Campo Táctico -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 sm:p-5 shadow-xl">
-          <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-              <h2 class="font-display text-lg font-bold uppercase tracking-wide text-white">
+              <h2 id="pitch-formation-title" class="font-display text-lg font-bold uppercase tracking-wide text-white">
                 7 Inicial · Esquema 3-2-1
               </h2>
+            </div>
+
+            <!-- Selector de Formación (3-2-1 / 2-3-1) -->
+            <div class="inline-flex items-center p-1 rounded-xl bg-slate-950 border border-slate-800" role="group" aria-label="Seleccionar formación">
+              <button
+                id="formation-btn-3-2-1"
+                onclick="setFormation('3-2-1')"
+                class="px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider transition"
+              >
+                3-2-1
+              </button>
+              <button
+                id="formation-btn-2-3-1"
+                onclick="setFormation('2-3-1')"
+                class="px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider transition"
+              >
+                2-3-1
+              </button>
             </div>
           </div>
 
@@ -497,15 +515,34 @@
 
     const POSITION_ORDER = { 'POR': 1, 'DEF': 2, 'MED/DEF': 3, 'MED': 4, 'MED/DEL': 5, 'DEL': 6 };
 
-    const PITCH_SLOTS = [
-      { id: 'DC',  label: 'DC',  fullName: 'Delantero Centro',  line: 'DEL', x: 50, y: 15, compatible: ['DEL', 'MED/DEL'] },
-      { id: 'MCI', label: 'MCI', fullName: 'Mediocentro Izq.',  line: 'MED', x: 30, y: 40, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
-      { id: 'MCD', label: 'MCD', fullName: 'Mediocentro Der.',  line: 'MED', x: 70, y: 40, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
-      { id: 'DFI', label: 'DFI', fullName: 'Lateral Izquierdo', line: 'DEF', x: 20, y: 65, compatible: ['DEF', 'MED/DEF'] },
-      { id: 'DFC', label: 'DFC', fullName: 'Defensa Central',   line: 'DEF', x: 50, y: 68, compatible: ['DEF', 'MED/DEF'] },
-      { id: 'DFD', label: 'DFD', fullName: 'Lateral Derecho',   line: 'DEF', x: 80, y: 65, compatible: ['DEF', 'MED/DEF'] },
-      { id: 'POR', label: 'POR', fullName: 'Portero',           line: 'POR', x: 50, y: 88, compatible: ['POR'] }
-    ];
+    const FORMATIONS = {
+      '3-2-1': {
+        id: '3-2-1',
+        label: '3-2-1',
+        slots: [
+          { id: 'DC',  label: 'DC',  fullName: 'Delantero Centro',  line: 'DEL', x: 50, y: 15, compatible: ['DEL', 'MED/DEL'] },
+          { id: 'MCI', label: 'MCI', fullName: 'Mediocentro Izq.',  line: 'MED', x: 30, y: 40, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
+          { id: 'MCD', label: 'MCD', fullName: 'Mediocentro Der.',  line: 'MED', x: 70, y: 40, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
+          { id: 'DFI', label: 'DFI', fullName: 'Lateral Izquierdo', line: 'DEF', x: 20, y: 65, compatible: ['DEF', 'MED/DEF'] },
+          { id: 'DFC', label: 'DFC', fullName: 'Defensa Central',   line: 'DEF', x: 50, y: 68, compatible: ['DEF', 'MED/DEF'] },
+          { id: 'DFD', label: 'DFD', fullName: 'Lateral Derecho',   line: 'DEF', x: 80, y: 65, compatible: ['DEF', 'MED/DEF'] },
+          { id: 'POR', label: 'POR', fullName: 'Portero',           line: 'POR', x: 50, y: 88, compatible: ['POR'] }
+        ]
+      },
+      '2-3-1': {
+        id: '2-3-1',
+        label: '2-3-1',
+        slots: [
+          { id: 'DC',  label: 'DC',  fullName: 'Delantero Centro',   line: 'DEL', x: 50, y: 15, compatible: ['DEL', 'MED/DEL'] },
+          { id: 'MI',  label: 'MI',  fullName: 'Interior Izquierdo', line: 'MED', x: 19, y: 41, compatible: ['MED', 'MED/DEL', 'MED/DEF'] },
+          { id: 'MC',  label: 'MC',  fullName: 'Mediocentro',        line: 'MED', x: 50, y: 44, compatible: ['MED', 'MED/DEF', 'MED/DEL'] },
+          { id: 'MD',  label: 'MD',  fullName: 'Interior Derecho',   line: 'MED', x: 81, y: 41, compatible: ['MED', 'MED/DEL', 'MED/DEF'] },
+          { id: 'DFI', label: 'DFI', fullName: 'Defensa Izquierdo',  line: 'DEF', x: 30, y: 67, compatible: ['DEF', 'MED/DEF'] },
+          { id: 'DFD', label: 'DFD', fullName: 'Defensa Derecho',    line: 'DEF', x: 70, y: 67, compatible: ['DEF', 'MED/DEF'] },
+          { id: 'POR', label: 'POR', fullName: 'Portero',            line: 'POR', x: 50, y: 88, compatible: ['POR'] }
+        ]
+      }
+    };
 
     // Código de color: Portero en blanco, jugadores de campo en verde
     const GREEN_PLAYER_STYLE = {
@@ -535,6 +572,7 @@
     // 2. ESTADO DE LA APLICACIÓN Y PERSISTENCIA
     // =========================================================================
     let state = {
+      formation: '3-2-1',
       players: [],
       lineup: {
         POR: null,
@@ -553,22 +591,30 @@
       dragPayload: null // { source: 'roster'|'bench'|'pitch', playerId, fromSlotId? }
     };
 
+    function getCurrentSlots() {
+      return (FORMATIONS[state.formation] || FORMATIONS['3-2-1']).slots;
+    }
+
+    function createEmptyLineup(formationId = state.formation) {
+      const slots = (FORMATIONS[formationId] || FORMATIONS['3-2-1']).slots;
+      const lineup = {};
+      slots.forEach(s => { lineup[s.id] = null; });
+      return lineup;
+    }
+
     function loadState() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed.players) && parsed.players.length > 0 && parsed.lineup) {
+            state.formation = FORMATIONS[parsed.formation] ? parsed.formation : '3-2-1';
             state.players = parsed.players;
-            state.lineup = {
-              POR: parsed.lineup.POR || null,
-              DFI: parsed.lineup.DFI || null,
-              DFC: parsed.lineup.DFC || null,
-              DFD: parsed.lineup.DFD || null,
-              MCI: parsed.lineup.MCI || null,
-              MCD: parsed.lineup.MCD || null,
-              DC:  parsed.lineup.DC  || null
-            };
+            const nextLineup = createEmptyLineup(state.formation);
+            for (const slotId of Object.keys(nextLineup)) {
+              nextLineup[slotId] = parsed.lineup[slotId] || null;
+            }
+            state.lineup = nextLineup;
             sanitizeLineup();
             return;
           }
@@ -576,7 +622,9 @@
       } catch (err) {
         console.warn('No se pudo leer localStorage, usando estado en memoria:', err);
       }
+      state.formation = '3-2-1';
       state.players = JSON.parse(JSON.stringify(INITIAL_SQUAD));
+      state.lineup = createEmptyLineup('3-2-1');
       sanitizeLineup();
     }
 
@@ -584,6 +632,7 @@
       sanitizeLineup();
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          formation: state.formation,
           players: state.players,
           lineup: state.lineup
         }));
@@ -597,15 +646,49 @@
       const validAvailableIds = new Set(
         state.players.filter(p => p.available).map(p => p.id)
       );
+      const slots = getCurrentSlots();
+      const sanitized = {};
       const seen = new Set();
-      for (const slotId of Object.keys(state.lineup)) {
-        const pid = state.lineup[slotId];
+
+      for (const slot of slots) {
+        const pid = state.lineup[slot.id];
         if (!pid || !validAvailableIds.has(pid) || seen.has(pid)) {
-          state.lineup[slotId] = null;
+          sanitized[slot.id] = null;
         } else {
+          sanitized[slot.id] = pid;
           seen.add(pid);
         }
       }
+      state.lineup = sanitized;
+    }
+
+    function setFormation(newFormation) {
+      if (!FORMATIONS[newFormation] || state.formation === newFormation) return;
+
+      const oldLineup = { ...state.lineup };
+      const nextLineup = createEmptyLineup(newFormation);
+
+      // Conservar los jugadores ya situados en puestos equivalentes
+      nextLineup.POR = oldLineup.POR || null;
+      nextLineup.DFI = oldLineup.DFI || null;
+      nextLineup.DFD = oldLineup.DFD || null;
+      nextLineup.DC  = oldLineup.DC  || null;
+
+      if (newFormation === '2-3-1') {
+        nextLineup.MI = oldLineup.MCI || null;
+        nextLineup.MC = oldLineup.DFC || null;
+        nextLineup.MD = oldLineup.MCD || null;
+      } else if (newFormation === '3-2-1') {
+        nextLineup.MCI = oldLineup.MI || null;
+        nextLineup.DFC = oldLineup.MC || null;
+        nextLineup.MCD = oldLineup.MD || null;
+      }
+
+      state.formation = newFormation;
+      state.lineup = nextLineup;
+      saveState();
+      renderAll();
+      showToast(`Esquema cambiado a ${newFormation}.`, 'emerald');
     }
 
     // =========================================================================
@@ -684,10 +767,27 @@
     // =========================================================================
     function renderAll() {
       sanitizeLineup();
+      renderFormationUI();
       renderStats();
       renderRosterList();
       renderPitch();
       renderBench();
+    }
+
+    function renderFormationUI() {
+      const headerBadge = document.getElementById('header-formation-badge');
+      const pitchTitle = document.getElementById('pitch-formation-title');
+      if (headerBadge) headerBadge.textContent = `Sistema ${state.formation}`;
+      if (pitchTitle) pitchTitle.textContent = `7 Inicial · Esquema ${state.formation}`;
+
+      ['3-2-1', '2-3-1'].forEach(f => {
+        const btn = document.getElementById(`formation-btn-${f}`);
+        if (!btn) return;
+        const isActive = state.formation === f;
+        btn.className = isActive
+          ? 'px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider bg-emerald-600 text-white shadow-sm transition'
+          : 'px-3 py-1 rounded-lg font-display text-xs sm:text-sm font-extrabold tracking-wider text-slate-400 hover:text-white transition';
+      });
     }
 
     function renderStats() {
@@ -820,8 +920,9 @@
 
     function renderPitch() {
       const layer = document.getElementById('pitch-slots-layer');
+      const slots = getCurrentSlots();
 
-      layer.innerHTML = PITCH_SLOTS.map(slot => {
+      layer.innerHTML = slots.map(slot => {
         const playerId = state.lineup[slot.id];
         const player = playerId ? getPlayerById(playerId) : null;
 
@@ -943,7 +1044,7 @@
         p.available = isAvailable;
       });
       if (!isAvailable) {
-        state.lineup = { POR: null, DFI: null, DFC: null, DFD: null, MCI: null, MCD: null, DC: null };
+        state.lineup = createEmptyLineup();
       }
       saveState();
       renderAll();
@@ -990,7 +1091,7 @@
     // 6. SELECCIÓN DE TITULARES, AUTOCOMPLETADO Y BANQUILLO
     // =========================================================================
     function openSlotModal(slotId) {
-      const slot = PITCH_SLOTS.find(s => s.id === slotId);
+      const slot = getCurrentSlots().find(s => s.id === slotId);
       if (!slot) return;
       state.activeSlotId = slotId;
 
@@ -1115,11 +1216,12 @@
       if (!player || !player.available) return;
       if (getAssignedSlotForPlayer(playerId)) return;
 
+      const slots = getCurrentSlots();
       // Buscar primero un hueco libre compatible con su posición
-      let targetSlot = PITCH_SLOTS.find(s => !state.lineup[s.id] && s.compatible.includes(player.position));
+      let targetSlot = slots.find(s => !state.lineup[s.id] && s.compatible.includes(player.position));
       // Si no hay compatible libre, buscar cualquier hueco libre (evitando poner a un jugador de campo en POR salvo que no quede otra)
       if (!targetSlot) {
-        targetSlot = PITCH_SLOTS.find(s => !state.lineup[s.id] && s.id !== 'POR') || PITCH_SLOTS.find(s => !state.lineup[s.id]);
+        targetSlot = slots.find(s => !state.lineup[s.id] && s.id !== 'POR') || slots.find(s => !state.lineup[s.id]);
       }
 
       if (targetSlot) {
@@ -1137,11 +1239,12 @@
         return;
       }
 
+      const slots = getCurrentSlots();
       const usedIds = getStarterIdsSet();
       let filled = 0;
 
       // 1ª pasada: rellenar puestos vacíos con jugadores ideales para cada demarcación
-      for (const slot of PITCH_SLOTS) {
+      for (const slot of slots) {
         if (state.lineup[slot.id]) continue;
         const candidate = available.find(p => !usedIds.has(p.id) && slot.compatible.includes(p.position));
         if (candidate) {
@@ -1152,7 +1255,7 @@
       }
 
       // 2ª pasada: si aún quedan puestos vacíos y hay convocados libres, completarlos
-      for (const slot of PITCH_SLOTS) {
+      for (const slot of slots) {
         if (state.lineup[slot.id]) continue;
         const candidate = available.find(p => !usedIds.has(p.id));
         if (candidate) {
@@ -1172,7 +1275,7 @@
     }
 
     function clearPitch() {
-      state.lineup = { POR: null, DFI: null, DFC: null, DFD: null, MCI: null, MCD: null, DC: null };
+      state.lineup = createEmptyLineup();
       saveState();
       renderAll();
       showToast('Alineación vaciada. Todos los convocados están en el banquillo.', 'emerald');
@@ -1381,7 +1484,7 @@
 
     function confirmResetRoster() {
       state.players = JSON.parse(JSON.stringify(INITIAL_SQUAD));
-      state.lineup = { POR: null, DFI: null, DFC: null, DFD: null, MCI: null, MCD: null, DC: null };
+      state.lineup = createEmptyLineup();
       saveState();
       renderAll();
       closeResetModal();
